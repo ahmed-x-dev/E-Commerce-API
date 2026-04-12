@@ -1,0 +1,38 @@
+# Secrets
+env
+.env
+*.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+
+# Docker files
+Dockerfile
+docker-compose.yml
+
+# Docs
+README.md
+*.md
+
+# Extra
+
+.git
+.gitignore
+.mypy_cache
+.ruff_cache
+build
+dist
