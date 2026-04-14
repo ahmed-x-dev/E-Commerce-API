@@ -1,10 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response, status
+
+from app.db.session import check_db_connection
 
 
 router = APIRouter(tags=["health"])
 
 
 @router.get("/health", summary="Health check")
-async def health_check() -> dict[str, str]:
-    return {"status": "ok"}
+def health_check(response: Response) -> dict[str, str]:
+    db_ok = check_db_connection()
+    if not db_ok:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return {"status": "degraded", "database": "unavailable"}
 
+    return {"status": "ok", "database": "connected"}

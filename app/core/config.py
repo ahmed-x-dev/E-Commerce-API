@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
 
     # Database
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ecommerce_api"
+    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/ecommerce_api"
 
     # JWT
     jwt_secret_key: str = "change-me"
@@ -43,6 +43,24 @@ class Settings(BaseSettings):
     def parse_cors_origins(cls, value: Any) -> Any:
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def parse_debug_value(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"1", "true", "yes", "on", "debug", "development", "dev"}:
+                return True
+            if normalized in {"0", "false", "no", "off", "release", "production", "prod"}:
+                return False
+        return value
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return value.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)
         return value
 
 
