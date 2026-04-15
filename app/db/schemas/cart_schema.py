@@ -13,6 +13,15 @@ class CartStatus(str, Enum):
     ABANDONED = "abandoned"
 
 
+class ShoppingCartCreate(ORMBaseModel):
+    user_id: int = Field(gt=0)
+    status: CartStatus = CartStatus.ACTIVE
+
+
+class ShoppingCartUpdate(ORMBaseModel):
+    status: CartStatus | None = None
+
+
 class CartItemCreate(ORMBaseModel):
     product_id: int = Field(gt=0)
     quantity: int = Field(ge=1)
@@ -39,4 +48,3 @@ class ShoppingCartRead(ORMBaseModel):
     created_at: datetime
     updated_at: datetime
     items: list[CartItemRead] = Field(default_factory=list)
-

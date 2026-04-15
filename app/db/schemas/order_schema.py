@@ -33,6 +33,32 @@ class CheckoutRequest(ORMBaseModel):
     payment_method: PaymentMethod = PaymentMethod.CARD
 
 
+class OrderCreate(ORMBaseModel):
+    user_id: int = Field(gt=0)
+    total_amount: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
+    status: OrderStatus = OrderStatus.PENDING
+
+
+class OrderUpdate(ORMBaseModel):
+    total_amount: Decimal | None = Field(default=None, gt=0, max_digits=10, decimal_places=2)
+    status: OrderStatus | None = None
+
+
+class PaymentCreate(ORMBaseModel):
+    order_id: int = Field(gt=0)
+    amount: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
+    method: PaymentMethod
+    status: PaymentStatus = PaymentStatus.PENDING
+    transaction_id: str | None = Field(default=None, max_length=255)
+
+
+class PaymentUpdate(ORMBaseModel):
+    amount: Decimal | None = Field(default=None, gt=0, max_digits=10, decimal_places=2)
+    method: PaymentMethod | None = None
+    status: PaymentStatus | None = None
+    transaction_id: str | None = Field(default=None, max_length=255)
+
+
 class PaymentRead(ORMBaseModel):
     id: int
     order_id: int
@@ -52,4 +78,3 @@ class OrderRead(ORMBaseModel):
     created_at: datetime
     updated_at: datetime
     payments: list[PaymentRead] = Field(default_factory=list)
-
