@@ -36,6 +36,8 @@ class ShoppingCart(Base, TimestampMixin):
         default=CartStatus.ACTIVE,
     )
 
+
+    # Relationships
     user: Mapped["User"] = relationship(back_populates="shopping_carts")
     items: Mapped[list["CartItem"]] = relationship(
         back_populates="cart",

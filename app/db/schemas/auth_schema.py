@@ -17,3 +17,15 @@ class TokenPayload(ORMBaseModel):
     sub: str | None = None
     exp: int | None = None
 
+
+class EmailVerificationRequest(ORMBaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+
+class SendPasswordResetEmailRequest(ORMBaseModel):
+    email: EmailStr
+
+class PasswordResetRequest(ORMBaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+    new_password: str = Field(min_length=8, max_length=128)

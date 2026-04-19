@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations # For forward references in type hints (Python 3.7+)
 
 import enum
 from decimal import Decimal
@@ -9,6 +9,7 @@ from sqlalchemy import ForeignKey, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+
 
 if TYPE_CHECKING:
     from app.db.models.payment_model import Payment

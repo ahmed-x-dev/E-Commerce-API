@@ -3,12 +3,12 @@ from typing import Any, Literal
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
+# This module defines the application settings using Pydantic's BaseSettings.
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
+        env_file=".env", # Load environment variables from a .env file if it exists
+        env_file_encoding="utf-8", #  Use UTF-8 encoding for the .env file
+        extra="ignore", # Ignore any extra fields in the environment variables that are not defined in the Settings model
     )
 
     # App
@@ -38,13 +38,22 @@ class Settings(BaseSettings):
     stripe_secret_key: str = "sk_test_change_me"
     stripe_webhook_secret: str = "whsec_change_me"
 
-    @field_validator("cors_origins", mode="before")
+    # Brevo (formerly Sendinblue)
+    brevo_api_key: str = "change-me"
+    mail_from: str = "ahmedfaisal833@yahoo.com"
+
+    http_only: bool = False  # Set to True in production for security
+
+
+    # Normalize the CORS origins to ensure they are always returned as a list, even if provided as a comma-separated string
+    @field_validator("cors_origins", mode="before") 
     @classmethod
     def parse_cors_origins(cls, value: Any) -> Any:
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
+    # Normalize the debug value to ensure it can be set using various string representations of boolean values
     @field_validator("debug", mode="before")
     @classmethod
     def parse_debug_value(cls, value: Any) -> Any:
@@ -55,7 +64,8 @@ class Settings(BaseSettings):
             if normalized in {"0", "false", "no", "off", "release", "production", "prod"}:
                 return False
         return value
-
+    
+    # Normalize the database URL to ensure compatibility with async drivers
     @field_validator("database_url", mode="before")
     @classmethod
     def normalize_database_url(cls, value: Any) -> Any:
@@ -64,6 +74,7 @@ class Settings(BaseSettings):
         return value
 
 
+# Cache the settings instance to avoid reloading it multiple times
 @lru_cache
 def get_settings() -> Settings:
     return Settings()

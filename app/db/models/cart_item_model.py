@@ -31,6 +31,10 @@ class CartItem(Base, TimestampMixin):
     quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     price_at_time: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
 
+
+
+
+    # Relationships
     cart: Mapped["ShoppingCart"] = relationship(back_populates="items")
     product: Mapped["Product"] = relationship(back_populates="cart_items")
 

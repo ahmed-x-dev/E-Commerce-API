@@ -4,10 +4,16 @@ from pydantic import EmailStr, Field
 
 from app.db.schemas.common import ORMBaseModel
 
+from enum import Enum 
+
+class UserRole(str, Enum):
+    admin = "admin"
+    staff = "staff"
+    customer = "customer"
 
 class UserBase(ORMBaseModel):
     email: EmailStr
-    name: str = Field(min_length=2, max_length=120)
+    name: str = Field(min_length=2, max_length=50)
 
 
 class UserCreate(UserBase):
@@ -15,7 +21,7 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(ORMBaseModel):
-    name: str | None = Field(default=None, min_length=2, max_length=120)
+    name: str | None = Field(default=None, min_length=2, max_length=50)
 
 
 class UserRead(UserBase):
