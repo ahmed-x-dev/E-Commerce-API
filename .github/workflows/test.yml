@@ -1,0 +1,82 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_ecommerce_api
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5434:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6380:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with flake8 (optional)
+        continue-on-error: true
+        run: |
+          pip install flake8
+          flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Run tests with pytest
+        env:
+          DATABASE_URL: postgresql+asyncpg://test_user:test_password@localhost:5434/test_ecommerce_api
+          REDIS_URL: redis://localhost:6380
+          DEBUG: 'false'
+        run: |
+          pytest -v --tb=short
+
+      - name: Generate coverage report
+        continue-on-error: true
+        env:
+          DATABASE_URL: postgresql+asyncpg://test_user:test_password@localhost:5434/test_ecommerce_api
+          REDIS_URL: redis://localhost:6380
+        run: |
+          pip install pytest-cov
+          pytest --cov=app --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        continue-on-error: true
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella

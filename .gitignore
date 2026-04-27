@@ -16,6 +16,9 @@ env/
 .env.*
 !.env.example
 
+# Docker Compose overrides (local development)
+docker-compose.override.yml
+
 .idea/
 .vscode/
 .DS_Store

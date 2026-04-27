@@ -41,6 +41,7 @@ class AuthService:
 
     @staticmethod
     def _hash_token(token: str) -> str:
+        """Hash a raw token before persisting it for secure lookup/revocation."""
         return hashlib.sha256(token.encode()).hexdigest()
 
     # -------------------------------------------------------------------------
@@ -49,6 +50,7 @@ class AuthService:
 
     @staticmethod
     def register(db: Session, data: UserCreate) -> UserRead:
+        """Create a new user, store a verification code, and send verification email."""
         existing = db.query(User).filter(User.email == data.email).first()
         if existing:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
@@ -86,6 +88,7 @@ class AuthService:
 
     @staticmethod
     def verify_email(db: Session, data: EmailVerificationRequest) -> None:
+        """Validate a verification code and mark the user email as verified."""
         user = db.query(User).filter(User.email == data.email, User.is_deleted == False).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -118,6 +121,7 @@ class AuthService:
 
     @staticmethod
     def login(db: Session, data: LoginRequest) -> tuple[str, str]:
+        """Validate credentials and issue access/refresh JWT tokens."""
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
@@ -150,6 +154,7 @@ class AuthService:
 
     @staticmethod
     def refresh(db: Session, refresh_token: str) -> tuple[str, str]:
+        """Rotate refresh token and return a new access/refresh token pair."""
         try:
             user_id = decode_token(refresh_token, expected_type="refresh")
         except JWTError:
@@ -188,6 +193,7 @@ class AuthService:
 
     @staticmethod
     def logout(db: Session, refresh_token: str) -> None:
+        """Revoke a refresh token so it cannot be reused."""
         db.query(RefreshToken).filter(
             RefreshToken.token_hash == AuthService._hash_token(refresh_token)
         ).update({"revoked": True})
@@ -200,6 +206,7 @@ class AuthService:
 
     @staticmethod
     def forgot_password(db: Session, email: EmailStr) -> None:
+        """Create and email a password reset code for an existing user account."""
         user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
         if not user:
             return  # silent — avoids email enumeration
@@ -224,6 +231,7 @@ class AuthService:
 
     @staticmethod
     def reset_password(db: Session, email: str, code: str, new_password: str) -> None:
+        """Validate reset code, change password, and revoke existing refresh tokens."""
         user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid request")

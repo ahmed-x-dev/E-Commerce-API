@@ -50,5 +50,6 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/", tags=["root"])
-async def root() -> dict[str, str]:
+def root() -> dict[str, str]:
+    """Return a basic message confirming the API process is running."""
     return {"message": f"{settings.app_name} is running"}

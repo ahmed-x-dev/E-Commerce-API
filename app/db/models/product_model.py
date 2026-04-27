@@ -21,5 +21,7 @@ class Product(Base, TimestampMixin):
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     stock_quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
+    is_deleted: Mapped[bool] = mapped_column(default=False, nullable=False)
+
     cart_items: Mapped[list["CartItem"]] = relationship(back_populates="product")
 

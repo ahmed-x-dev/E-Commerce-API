@@ -22,6 +22,7 @@ def register(
     data: UserCreate, 
     db: Session = Depends(get_db)
     ):
+    """Register a new user account and send an email verification code."""
 
     return  AuthService.register(db, data)
 
@@ -39,6 +40,7 @@ def login(
     response: Response,
     db: Session = Depends(get_db)
     ):
+    """Authenticate a user and return an access token while setting a refresh cookie."""
 
     access_token, refresh_token = AuthService.login(db, data)
 
@@ -64,6 +66,7 @@ def refresh(
     response: Response,
     db: Session = Depends(get_db)
     ):
+    """Rotate the refresh token and issue a fresh access token."""
         
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
@@ -95,6 +98,7 @@ def logout(
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    """Revoke the current refresh token and clear it from browser cookies."""
     # 1. Get the refresh token from the cookie
     refresh_token = request.cookies.get("refresh_token")
 
@@ -124,6 +128,7 @@ def verify_email(
     data: EmailVerificationRequest,
     db: Session = Depends(get_db)
     ):
+    """Verify a user's email address using the one-time code."""
 
     AuthService.verify_email(db, data)
     return {"message": "Email verified successfully"}
@@ -136,6 +141,7 @@ def request_password_reset(
     data: SendPasswordResetEmailRequest,
     db: Session = Depends(get_db)
     ):
+    """Send a password reset code to the user's email if the account exists."""
 
     AuthService.forgot_password(db, data.email)
     return {"message": "Password reset email sent if the email is registered"}
@@ -148,6 +154,7 @@ def reset_password(
     data: PasswordResetRequest,
     db: Session = Depends(get_db)
     ):
+    """Reset a user's password after validating the reset code."""
 
     AuthService.reset_password(db,data.email, data.code, data.new_password)
     return {"message": "Password reset successfully"}
