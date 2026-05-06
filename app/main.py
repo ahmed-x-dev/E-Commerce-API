@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.logging import setup_logging, logger
-from app.core.middleware.security_headers import SecurityHeadersMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.db.session import init_db
 from app.routers.api import api_router
 
